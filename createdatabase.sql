@@ -10,6 +10,3 @@ CREATE TABLE users(
                       lname varchar(45) not null,
                       email varchar(45) not null
 );
-
-
-
