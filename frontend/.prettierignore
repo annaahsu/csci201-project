@@ -1,0 +1,7 @@
+# Ignore artifacts:
+.next/
+.turbo/
+_next/
+__tmp__/
+dist/
+node_modules/

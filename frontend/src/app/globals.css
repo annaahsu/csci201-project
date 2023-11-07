@@ -1,0 +1,29 @@
+:root {
+  --black: #000;
+  --dgray: #666;
+  --lgray: #eee;
+  --white: #fff;
+
+  --drop: 0px 0px 4px 0px rgba(0, 0, 0, 0.25);
+  --dramatic-drop: 0px 0px 16px 0px rgba(0, 0, 0, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
