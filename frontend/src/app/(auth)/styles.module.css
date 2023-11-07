@@ -1,0 +1,27 @@
+.main {
+  flex-grow: 1;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 16px;
+}
+
+.content {
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.text {
+  text-align: center;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+}
