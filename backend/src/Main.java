@@ -7,8 +7,8 @@ import java.util.concurrent.Executors;
 
 public class Main {
 
-    private static int canvasWidth = 100;
-    private static int canvasHeight = 100;
+    private static final int CANVAS_WIDTH = 360;
+    private static final int CANVAS_HEIGHT = 240;
 
     public static void main(String[] args) {
         System.out.println("Starting backend...");
@@ -16,6 +16,6 @@ public class Main {
         ExecutorService threadpool = Executors.newCachedThreadPool();
 
         threadpool.execute(new AuthThread());
-        threadpool.execute(new SyncThread(canvasWidth, canvasHeight));
+        threadpool.execute(new SyncThread(CANVAS_WIDTH, CANVAS_HEIGHT));
     }
 }
