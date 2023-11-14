@@ -1,34 +1,85 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Palette from "@/components/Palette/Palette";
 import styles from "./Canvas.module.css";
+import useWebSocket from "react-use-websocket";
 
 export default function Canvas() {
-  const colors = [
-    "#000000",
-    "#ffffff",
-    "#00ff00",
-    "#0000ff",
-    "#00ffff",
-    "#ff0000",
-    "#ff00ff",
-    "#ff9f00",
-    "#ffff00",
-    "#d9d9d9",
-  ];
+  const width = 360;
+  const height = 240;
+  const [colors, setColors] = useState([]);
+  const [colorsTimestamp, setColorsTimestamp] = useState(0);
   const widths = [1, 2, 4];
-
-  let changes = [];
-
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [prevX, setPrevX] = useState(0);
   const [prevY, setPrevY] = useState(0);
-  const [lineColor, setLineColor] = useState(colors[0]);
+  const [lineColor, setLineColor] = useState(null);
+  const [lineColorIndex, setLineColorIndex] = useState(-1);
   const [lineWidth, setLineWidth] = useState(widths[0]);
-  const width = 360;
-  const height = 240;
+
+  const [changes, setChanges] = useState([]);
+  const timestamps = new Array(width).fill(new Array(height).fill(0));
+
+  const socketUrl = "ws://localhost:8124";
+
+  const { sendJsonMessage, lastJsonMessage } = useWebSocket(socketUrl, {
+    onOpen: () => console.log("opened"),
+    //Will attempt to reconnect on all close events, such as server shutting down
+    shouldReconnect: (closeEvent) => true,
+  });
+
+  // to send out updates
+  useEffect(() => {
+    const intervalID = setInterval(() => {
+      if (changes.length > 0) {
+        const update = {
+          pixels: changes,
+          palette: {
+            colors: colors,
+            timestamp: Date.now(),
+          },
+        };
+        sendJsonMessage(update);
+        console.log(update)
+        setChanges([]);
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalID);
+  }, [changes]);
+
+  // to receive updates
+  useEffect(() => {
+    if (lastJsonMessage) {
+      const newPalette = lastJsonMessage.palette;
+      const newPixels = lastJsonMessage.pixels;
+
+      if (newPalette.timestamp > colorsTimestamp) {
+        setColors(newPalette.colors);
+        setColorsTimestamp(newPalette.timestamp);
+        if (!lineColor) {
+          setLineColor(newPalette.colors[0]);
+          setLineColorIndex(0);
+        }
+      }
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      newPixels.map(({ colorIndex, timestamp, x, y }) => {
+        if (timestamp > timestamps[x][y]) {
+          ctx.fillStyle = newPalette.colors[colorIndex];
+          ctx.fillRect(x, y, 1, 1);
+        }
+      });
+    }
+  }, [lastJsonMessage]);
+
+  const handleLineColor = (i) => {
+    setLineColor(colors[i]);
+    setLineColorIndex(i);
+  };
 
   const handleMouseDown = (e) => {
     setIsDrawing(true);
@@ -65,17 +116,15 @@ export default function Canvas() {
 
     setPrevX(currentX);
     setPrevY(currentY);
-    changes.push([currentX, currentY]);
-  };
-
-  const pushChanges = () => {
-    // get current time, array of pixel changes, color
-    const json = {
-      timestamp: Date.now(),
-      pixels: changes,
-      color: lineColor,
-    };
-    changes = []; // empty out the changes for next push
+    setChanges([
+      ...changes,
+      {
+        colorIndex: lineColorIndex,
+        timestamp: Date.now(),
+        x: currentX,
+        y: currentY,
+      },
+    ]);
   };
 
   return (
@@ -94,7 +143,8 @@ export default function Canvas() {
       </canvas>
       <Palette
         colors={colors}
-        handleLineColor={setLineColor}
+        // handleLineColor={setLineColor}
+        handleLineColor={handleLineColor}
         widths={widths}
         handleLineWidth={setLineWidth}
       />

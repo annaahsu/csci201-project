@@ -22,7 +22,7 @@ export default function Palette({
       </div>
       <div className={`${styles.colorPalette} ${styles.paletteSection}`}>
         {colors.map((c, i) => (
-          <Color color={c} handleLineColor={handleLineColor} key={i} />
+          <Color color={c} handleLineColor={handleLineColor} index={i} key={i} />
         ))}
       </div>
       <div className={`${styles.stroke} ${styles.paletteSection}`}>
@@ -45,7 +45,7 @@ export default function Palette({
                 x2="0.5"
                 y2="21.5"
                 stroke="black"
-                stroke-width={w}
+                strokeWidth={w}
               />
             </svg>
           </div>
@@ -55,12 +55,12 @@ export default function Palette({
   );
 }
 
-function Color({ color, handleLineColor }) {
+function Color({ color, handleLineColor, index }) {
   return (
     <div
       className={styles.color}
       style={{ background: `${color}` }}
-      onClick={() => handleLineColor(color)}
+      onClick={() => handleLineColor(index)}
     />
   );
 }
