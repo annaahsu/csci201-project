@@ -21,7 +21,7 @@
   border-left: 1px solid var(--lgray);
   border-right: 1px solid var(--lgray);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(16, 1fr);
   gap: 16px;
 }
 

@@ -8,4 +8,5 @@
 .canvas {
   width: 100%;
   box-shadow: var(--dramatic-drop);
+  image-rendering: pixelated;
 }
