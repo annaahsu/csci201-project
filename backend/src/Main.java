@@ -11,6 +11,6 @@ public class Main {
         ExecutorService threadpool = Executors.newCachedThreadPool();
 
         threadpool.execute(new AuthThread());
-        threadpool.execute(new SyncThread());
+        //threadpool.execute(new SyncThread());
     }
 }
