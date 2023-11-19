@@ -19,7 +19,6 @@ export default function Canvas() {
   const [lineColorIndex, setLineColorIndex] = useState(-1);
   const [lineWidth, setLineWidth] = useState(widths[0]);
 
-  const [changes, setChanges] = useState([]);
   const timestamps = new Array(width).fill(new Array(height).fill(0));
 
   const socketUrl = "ws://localhost:8124";
@@ -30,31 +29,10 @@ export default function Canvas() {
     shouldReconnect: (closeEvent) => true,
   });
 
-  // // to send out updates
-  // useEffect(() => {
-  //   const intervalID = setInterval(() => {
-  //     if (changes.length > 0) {
-  //       console.log('updating', changes);
-  //       const update = {
-  //         pixels: changes,
-  //         palette: {
-  //           colors: colors,
-  //           timestamp: Date.now(),
-  //         },
-  //       };
-  //       sendJsonMessage(update);
-  //       console.log(update)
-  //       setChanges([]);
-  //     }
-  //   }, 30);
-  //
-  //   return () => clearInterval(intervalID);
-  // }, [changes]);
-
   // to receive updates
   useEffect(() => {
     if (lastJsonMessage) {
-      console.log('updating with', lastJsonMessage);
+      console.log("updating with", lastJsonMessage);
       const newPalette = lastJsonMessage.palette;
       const newPixels = lastJsonMessage.pixels;
       if (newPalette.timestamp > colorsTimestamp) {
@@ -84,8 +62,8 @@ export default function Canvas() {
 
   const handleMouseDown = (e) => {
     setIsDrawing(true);
-    prevX.current = (e.nativeEvent.offsetX);
-    prevY.current = (e.nativeEvent.offsetY);
+    prevX.current = e.nativeEvent.offsetX;
+    prevY.current = e.nativeEvent.offsetY;
   };
 
   const handleMouseUp = () => {
@@ -106,10 +84,6 @@ export default function Canvas() {
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    // ctx.strokeStyle = lineColor;
-    // ctx.lineWidth = lineWidth;
-    // ctx.lineJoin = "bevel";
-    // ctx.lineCap = "round";
     ctx.imageSmoothingEnabled = false;
 
     const container = document.getElementById("canvas");
@@ -119,60 +93,70 @@ export default function Canvas() {
     // implementation of Bresenham's line algorithm
     // based on https://storage.googleapis.com/jblate/medium/bresenham-line-algorithm.html
     let pixelsSet = new Set();
-    function encode(x, y) {
-      return x*9999+y;
-    }
-    function bresenhamAlgorithm(startX, startY, endX, endY) {
+    const encode = (x, y) => {
+      return x * 9999 + y;
+    };
+    const bresenhamAlgorithm = (startX, startY, endX, endY) => {
+      const deltaCol = Math.abs(endX - startX); // zero or positive number
+      const deltaRow = Math.abs(endY - startY); // zero or positive number
 
-      const deltaCol = Math.abs(endX - startX) // zero or positive number
-      const deltaRow = Math.abs(endY - startY) // zero or positive number
+      let pointX = startX;
+      let pointY = startY;
 
-      let pointX = startX
-      let pointY = startY
+      const horizontalStep = startX < endX ? 1 : -1;
 
-      const horizontalStep = (startX < endX) ? 1 : -1
+      const verticalStep = startY < endY ? 1 : -1;
 
-      const verticalStep = (startY < endY) ? 1 : -1
-
-      let difference = deltaCol - deltaRow
+      let difference = deltaCol - deltaRow;
 
       while (true) {
+        const doubleDifference = 2 * difference; // necessary to store this value
 
-        const doubleDifference = 2 * difference // necessary to store this value
-
-        if (doubleDifference > -deltaRow) { difference -= deltaRow; pointX += horizontalStep }
-        if (doubleDifference <  deltaCol) { difference += deltaCol; pointY += verticalStep }
+        if (doubleDifference > -deltaRow) {
+          difference -= deltaRow;
+          pointX += horizontalStep;
+        }
+        if (doubleDifference < deltaCol) {
+          difference += deltaCol;
+          pointY += verticalStep;
+        }
 
         pixelsSet.add(encode(pointX, pointY));
 
-        if ((pointX == endX) && (pointY == endY)) { break }
+        if (pointX == endX && pointY == endY) {
+          break;
+        }
       }
 
       // width adjustment - copy out set, apply mask to each point
-      if(lineWidth === 2) {
+      if (lineWidth === 2) {
         // todo - a no good very bad implementation
         const pixelSetCopy = new Set(pixelsSet);
-        for(const pix of pixelSetCopy) {
-          const x = Math.floor(pix/9999);
+        for (const pix of pixelSetCopy) {
+          const x = Math.floor(pix / 9999);
           const y = pix % 9999;
-          pixelsSet.add(encode(x+1, y));
-          pixelsSet.add(encode(x, y+1));
+          pixelsSet.add(encode(x + 1, y));
+          pixelsSet.add(encode(x, y + 1));
         }
-      }
-      else if(lineWidth === 4) {
+      } else if (lineWidth === 4) {
         const pixelSetCopy = new Set(pixelsSet);
-        for(const pix of pixelSetCopy) {
-          const x = Math.floor(pix/9999);
+        for (const pix of pixelSetCopy) {
+          const x = Math.floor(pix / 9999);
           const y = pix % 9999;
-          pixelsSet.add(encode(x-1, y));
-          pixelsSet.add(encode(x+1, y));
-          pixelsSet.add(encode(x, y-1));
-          pixelsSet.add(encode(x, y+1));
+          pixelsSet.add(encode(x - 1, y));
+          pixelsSet.add(encode(x + 1, y));
+          pixelsSet.add(encode(x, y - 1));
+          pixelsSet.add(encode(x, y + 1));
         }
       }
-    }
-    bresenhamAlgorithm(Math.round(myPrevX / scaleX), Math.round(myPrevY / scaleY), Math.round(currentX / scaleX), Math.round(currentY / scaleY));
-    const bigint = parseInt(lineColor.replaceAll('#', ''), 16);
+    };
+    bresenhamAlgorithm(
+      Math.round(myPrevX / scaleX),
+      Math.round(myPrevY / scaleY),
+      Math.round(currentX / scaleX),
+      Math.round(currentY / scaleY),
+    );
+    const bigint = parseInt(lineColor.replaceAll("#", ""), 16);
     const r = (bigint >> 16) & 255;
     const g = (bigint >> 8) & 255;
     const b = bigint & 255;
@@ -183,10 +167,10 @@ export default function Canvas() {
     pixel.data[3] = 255;
     const newChanges = [];
     const tstamp = Date.now();
-    for(const pix of pixelsSet) {
+    for (const pix of pixelsSet) {
       const x = Math.floor(pix / 9999);
       const y = pix % 9999;
-      if(x < 0 || x >= width || y < 0 || y >= height) {
+      if (x < 0 || x >= width || y < 0 || y >= height) {
         continue;
       }
       const p = { x: x, y: y, timestamp: tstamp, colorIndex: lineColorIndex };
@@ -194,7 +178,6 @@ export default function Canvas() {
       newChanges.push(p);
     }
 
-    console.log('updating', changes);
     const update = {
       pixels: newChanges,
       palette: {
@@ -203,14 +186,7 @@ export default function Canvas() {
       },
     };
     sendJsonMessage(update);
-    console.log(update)
-    setChanges([]);
-
-    // ctx.beginPath();
-    // ctx.moveTo(prevX / scaleX, prevY / scaleY);
-    // ctx.lineTo(currentX / scaleX, currentY / scaleY);
-    // ctx.stroke();
-    // setChanges([...changes, ...newChanges]);
+    console.log(update);
   };
 
   return (

@@ -22,7 +22,12 @@ export default function Palette({
       </div>
       <div className={`${styles.colorPalette} ${styles.paletteSection}`}>
         {colors.map((c, i) => (
-          <Color color={c} handleLineColor={handleLineColor} index={i} key={i} />
+          <Color
+            color={c}
+            handleLineColor={handleLineColor}
+            index={i}
+            key={i}
+          />
         ))}
       </div>
       <div className={`${styles.stroke} ${styles.paletteSection}`}>
