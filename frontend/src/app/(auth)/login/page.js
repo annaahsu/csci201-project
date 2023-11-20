@@ -1,6 +1,7 @@
+import Link from "next/link";
 import Button from "@/components/Button/Button";
-import styles from "../styles.module.css";
 import Input from "@/components/Input/Input";
+import styles from "../styles.module.css";
 
 export default function LoginPage() {
   return (
@@ -8,13 +9,13 @@ export default function LoginPage() {
       <p className={styles.text}>Welcome. Please log in.</p>
       <form id="login" method="get" action="/canvas">
         <div className={styles.form}>
-          <Input required placeholder="Username" name="username"></Input>
+          <Input required placeholder="Username" name="username" />
           <Input
             required
             type="password"
             placeholder="Password"
             name="password"
-          ></Input>
+          />
         </div>
       </form>
       <div className={styles.buttons}>
@@ -24,17 +25,14 @@ export default function LoginPage() {
       </div>
       <p className={styles.small}>
         New member?{" "}
-        <span>
-          <a href="/signup" className={styles.smalllink}>
-            Create an account
-          </a>
-        </span>{" "}
+        <Link href="/signup" className={styles.smalllink}>
+          Create an account
+        </Link>{" "}
         or{" "}
-        <span>
-          <a href="/canvas" className={styles.smalllink}>
-            continue as guest
-          </a>
-        </span>
+        <Link href="/canvas" className={styles.smalllink}>
+          continue as guest
+        </Link>
+        .
       </p>
     </div>
   );
