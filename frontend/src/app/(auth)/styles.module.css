@@ -25,3 +25,15 @@
   display: flex;
   gap: 1rem;
 }
+
+.small {
+  font-size: 14px;
+  text-align: center;
+}
+
+.smalllink {
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+}
+

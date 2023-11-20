@@ -2,7 +2,7 @@ import { Gothic_A1 } from "next/font/google";
 import "../globals.css";
 import styles from "./styles.module.css";
 
-const gothic = Gothic_A1({ weight: ["400", "900"], subsets: ["latin"] });
+const gothic = Gothic_A1({ weight: ["400", "600", "900"], subsets: ["latin"] });
 
 export const metadata = {
   title: "CANVAS",
