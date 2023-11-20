@@ -1,0 +1,47 @@
+.palette {
+  display: flex;
+  box-shadow: var(--drop);
+}
+
+.paletteSection {
+  padding: 16px;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tool:hover {
+  cursor: pointer;
+}
+
+.colorPalette {
+  border-left: 1px solid var(--lgray);
+  border-right: 1px solid var(--lgray);
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 16px;
+}
+
+.stroke {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.width:hover {
+  cursor: pointer;
+}
+
+.color {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  box-shadow: var(--drop);
+}
+
+.color:hover {
+  cursor: pointer;
+}

@@ -1,6 +1,12 @@
+.canvasWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
 .canvas {
   width: 100%;
-  height: 72vh;
-  background: var(--white);
   box-shadow: var(--dramatic-drop);
+  image-rendering: pixelated;
 }
