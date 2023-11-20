@@ -24,6 +24,4 @@ public class AuthThread extends Thread {
         server.setExecutor(null);
         server.start();
     }
-
-
 }
