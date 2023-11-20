@@ -199,6 +199,5 @@ public class Login implements HttpHandler {
         }
 
         return s + hashHex.toString();
-
     }
 }
