@@ -44,8 +44,17 @@ public class Login implements HttpHandler {
         String username = jsonObject.get("username").toString();
         String password = jsonObject.get("password").toString();
         String response = "";
+        // Setting content-type
+        l.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        l.getResponseHeaders().add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+        l.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+        l.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,HEAD");
+        l.getResponseHeaders().add("Content-type", "application/json");
         if(authenticate(username, password)) {
-            response = generateJWTToken();
+            // Formatting response to be JSON format
+            String token = generateJWTToken();
+            response = "{" + "\"jwtToken\": \"" + token + "\"}";
+            System.out.println(response);
             l.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
         }
         else {
@@ -64,7 +73,7 @@ public class Login implements HttpHandler {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/csci201project?user=root&password=theadmiral123");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/csci201project?user=root&password=root");
             String query = "SELECT salt FROM users WHERE username=?";
             ps = conn.prepareStatement(query);
             ps.setString(1, username);
@@ -84,7 +93,7 @@ public class Login implements HttpHandler {
                     return true;
                 }
                 else {
-                    System.out.println("Password incorrect!");
+                    System.out.println("Incorrect password!");
                     return false;
                 }
             }
