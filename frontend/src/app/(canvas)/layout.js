@@ -33,7 +33,6 @@ export default function CanvasRootLayout({ children }) {
         <nav className={styles.nav}>
           <h1>CANVAS</h1>
           <div className={styles.navLinks}>
-            <ButtonLink href="/canvas">Canvas</ButtonLink>
             {
               !isSignedIn
                 ? <ButtonLink href={'/login'}>Log In</ButtonLink>
