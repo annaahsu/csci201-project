@@ -33,9 +33,15 @@ public class SignUp implements HttpHandler {
         String lname = jsonObject.get("lname").toString();
         String username = jsonObject.get("uname").toString();
         String email = jsonObject.get("email").toString();
-        String password = jsonObject.get("pw").toString();
-        String confirmPassword = jsonObject.get("confirmpw").toString();
-        String response = "";
+        String password = jsonObject.get("password").toString();
+        String confirmPassword = jsonObject.get("confirmPassword").toString();
+        String response;
+
+        s.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        s.getResponseHeaders().add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+        s.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+        s.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,HEAD");
+        s.getResponseHeaders().add("Content-type", "application/json");
 
         // Response if passwords do not match
         if (!password.equals(confirmPassword)) {
@@ -48,6 +54,7 @@ public class SignUp implements HttpHandler {
             os.close();
             return;
         }
+        System.out.println("test4");
 
         // Hashed password
         String[] hashData = hash(password);
@@ -56,9 +63,10 @@ public class SignUp implements HttpHandler {
 
         // Inserting hashed password and rest of user data in the database
         boolean signUpSuccess = insertIntoDatabase(username, hashedPassword, fname, lname, email, salt);
+        System.out.println(signUpSuccess);
         if (signUpSuccess) {
             System.out.println("Inserted into database.");
-            response = "Successfully signed up! You can now draw on the canvas!";
+            response = Login.generateJWTToken();
             s.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
         }
         else {
@@ -96,14 +104,15 @@ public class SignUp implements HttpHandler {
         ResultSet rs = null;
         try {
             // Connecting with database
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/csci201project?user=root&password=theadmiral123");
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/csci201project?user=root&password=root");
             // Check if username already exists in database
-            String checkQuery = "SELECT username FROM users WHERE username=?";
+            String checkQuery = "SELECT username FROM csci201project.users WHERE username=?";
             ps = conn.prepareStatement(checkQuery);
             ps.setString(1, username);
             rs = ps.executeQuery();
             if (!rs.next()) {
-                String insertQuery = "INSERT INTO users VALUES (?,?,?,?,?,?)";
+                String insertQuery = "INSERT INTO csci201project.users VALUES (?,?,?,?,?,?)";
                 ps = conn.prepareStatement(insertQuery);
                 ps.setString(1, username);
                 ps.setString(2, hashedPassword);
@@ -118,7 +127,7 @@ public class SignUp implements HttpHandler {
                 // Username already exists
                 return false;
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
             try {

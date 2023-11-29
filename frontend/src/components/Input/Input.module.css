@@ -7,4 +7,5 @@
   outline: none;
   box-shadow: var(--drop);
   width: 100%;
+  text-align: center;
 }

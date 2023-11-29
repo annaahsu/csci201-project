@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Palette from "@/components/Palette/Palette";
 import styles from "./Canvas.module.css";
 import useWebSocket from "react-use-websocket";
+import { default as palette } from "@/palette";
 
 export default function Canvas() {
   const width = 360;
@@ -18,40 +19,82 @@ export default function Canvas() {
   const [lineColor, setLineColor] = useState(null);
   const [lineColorIndex, setLineColorIndex] = useState(-1);
   const [lineWidth, setLineWidth] = useState(widths[0]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const emptyPixelData = useMemo(() => {
+    const initial = new Array(width).fill(0);
+    for (let x = 0; x < width; ++x) {
+      initial[x] = new Array(height).fill(0);
+      for (let y = 0; y < height; ++y) {
+        initial[x][y] = { x: x, y: y, timestamp: 0, colorIndex: 0 };
+      }
+    }
+    return initial;
+  }, []);
+  const pixelData = useRef(emptyPixelData);
 
-  const timestamps = new Array(width).fill(new Array(height).fill(0));
+  const socketUrl = "wss://canvas-websocket.jamm.es/ws";
 
-  const socketUrl = "ws://localhost:8124";
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem("token") !== null);
+  }, []);
 
-  const { sendJsonMessage, lastJsonMessage } = useWebSocket(socketUrl, {
-    onOpen: () => console.log("opened"),
-    //Will attempt to reconnect on all close events, such as server shutting down
-    shouldReconnect: (closeEvent) => true,
-  });
+  const { sendJsonMessage, lastJsonMessage, sendMessage } = useWebSocket(
+    socketUrl,
+    {
+      onOpen: () => {
+        if (localStorage.getItem("token") === null) {
+          sendMessage("guest");
+          console.log("opened guest");
+        } else {
+          sendMessage(localStorage.getItem("token"));
+          console.log("opened token");
+        }
+      },
+      //Will attempt to reconnect on all close events, such as server shutting down
+      shouldReconnect: (closeEvent) => true,
+    },
+  );
 
   // to receive updates
   useEffect(() => {
     if (lastJsonMessage) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
       console.log("updating with", lastJsonMessage);
       const newPalette = lastJsonMessage.palette;
       const newPixels = lastJsonMessage.pixels;
-      if (newPalette.timestamp > colorsTimestamp) {
+      let authoritativeColors = colors;
+      if (newPalette !== undefined && newPalette.timestamp > colorsTimestamp) {
+        authoritativeColors = newPalette.colors;
         setColors(newPalette.colors);
+        setLineColor(newPalette.colors[lineColorIndex]);
         setColorsTimestamp(newPalette.timestamp);
         if (!lineColor) {
           setLineColor(newPalette.colors[0]);
           setLineColorIndex(0);
         }
+
+        if (newPixels === undefined) {
+          for (let x = 0; x < width; ++x) {
+            for (let y = 0; y < height; ++y) {
+              const colorIndex = pixelData.current[x][y].colorIndex;
+              ctx.fillStyle = authoritativeColors[colorIndex];
+              ctx.fillRect(x, y, 1, 1);
+            }
+          }
+        }
       }
 
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
-      newPixels.map(({ colorIndex, timestamp, x, y }) => {
-        if (timestamp > timestamps[x][y]) {
-          ctx.fillStyle = newPalette.colors[colorIndex];
-          ctx.fillRect(x, y, 1, 1);
-        }
-      });
+      if (newPixels !== undefined) {
+        newPixels.map(({ colorIndex, timestamp, x, y }) => {
+          if (timestamp > pixelData.current[x][y].timestamp) {
+            ctx.fillStyle = authoritativeColors[colorIndex];
+            ctx.fillRect(x, y, 1, 1);
+            pixelData.current[x][y].timestamp = timestamp;
+            pixelData.current[x][y].colorIndex = colorIndex;
+          }
+        });
+      }
     }
   }, [lastJsonMessage]);
 
@@ -71,7 +114,12 @@ export default function Canvas() {
   };
 
   const handleMouseMove = async (e) => {
-    if (!isDrawing || lineColor === null) return;
+    if (
+      !isDrawing ||
+      lineColor === null ||
+      localStorage.getItem("token") == null
+    )
+      return;
 
     const currentX = e.nativeEvent.offsetX;
     const currentY = e.nativeEvent.offsetY;
@@ -170,6 +218,14 @@ export default function Canvas() {
     for (const pix of pixelsSet) {
       const x = Math.floor(pix / 9999);
       const y = pix % 9999;
+
+      if (tstamp < pixelData.current[x][y].timestamp) {
+        continue;
+      }
+
+      pixelData.current[x][y].timestamp = tstamp;
+      pixelData.current[x][y].colorIndex = lineColorIndex;
+
       if (x < 0 || x >= width || y < 0 || y >= height) {
         continue;
       }
@@ -186,7 +242,55 @@ export default function Canvas() {
       },
     };
     sendJsonMessage(update);
-    console.log(update);
+  };
+
+  const handleChangePalette = () => {
+    const newPalette = palette[Math.floor(Math.random() * palette.length)];
+    const timestamp = Date.now();
+    if (timestamp < colorsTimestamp) {
+      return;
+    }
+    setColors(newPalette);
+    setLineColor(newPalette[lineColorIndex]);
+    setColorsTimestamp(timestamp);
+    sendJsonMessage({
+      palette: {
+        colors: newPalette,
+        timestamp: timestamp,
+      },
+    });
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    for (let x = 0; x < width; ++x) {
+      for (let y = 0; y < height; ++y) {
+        const colorIndex = pixelData.current[x][y].colorIndex;
+        ctx.fillStyle = newPalette[colorIndex];
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  };
+
+  const handleClearAll = () => {
+    const pixels = [];
+    const timestamp = Date.now();
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    for (let x = 0; x < width; ++x) {
+      for (let y = 0; y < height; ++y) {
+        if (pixelData.current[x][y].timestamp > timestamp) {
+          continue;
+        }
+        pixelData.current[x][y].timestamp = timestamp;
+        pixelData.current[x][y].colorIndex = 0;
+        pixels.push({ x: x, y: y, timestamp: timestamp, colorIndex: 0 });
+        ctx.fillStyle = colors[0];
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+
+    sendJsonMessage({
+      pixels: pixels,
+    });
   };
 
   return (
@@ -209,6 +313,9 @@ export default function Canvas() {
         handleLineColor={handleLineColor}
         widths={widths}
         handleLineWidth={setLineWidth}
+        isLoggedIn={isLoggedIn}
+        handleClearAll={handleClearAll}
+        handleChangePalette={handleChangePalette}
       />
     </div>
   );

@@ -3,10 +3,10 @@ DROP DATABASE IF EXISTS csci201project;
 CREATE DATABASE csci201project;
 USE csci201project;
 CREATE TABLE users(
-                      id int primary key not null auto_increment,
-                      username int not null,
-                      password varchar(45) not null,
+                      username varchar(45) primary key not null,
+                      password varchar(512) not null,
                       fname varchar(45) not null,
                       lname varchar(45) not null,
-                      email varchar(45) not null
+                      email varchar(45) not null,
+                      salt varchar(45) not null
 );

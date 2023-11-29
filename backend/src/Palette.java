@@ -11,10 +11,10 @@ public class Palette {
 
     public Palette() {
         colors = new String[] {
-                "#1a1c2c", "#5d275d", "#b13e53", "#ef7d57",
-                "#ffcd75", "#a7f070", "#38b764", "#257179",
-                "#29366f", "#3b5dc9", "#41a6f6", "#73eff7",
-                "#f4f4f4", "#94b0c2", "#566c86", "#333c57"
+                "#f6dbba", "#db604c",
+                "#b13353", "#5e2052",
+                "#74c99e", "#317c87",
+                "#271854", "#1a1016"
         };
         timestamp = System.currentTimeMillis();
     }
