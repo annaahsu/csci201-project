@@ -35,7 +35,7 @@ public class SignUp implements HttpHandler {
         String email = jsonObject.get("email").toString();
         String password = jsonObject.get("password").toString();
         String confirmPassword = jsonObject.get("confirmPassword").toString();
-        String response = "";
+        String response;
 
         s.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         s.getResponseHeaders().add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
