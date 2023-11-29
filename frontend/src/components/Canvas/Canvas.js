@@ -1,10 +1,10 @@
 "use client";
 
-import {useEffect, useMemo, useRef, useState} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Palette from "@/components/Palette/Palette";
 import styles from "./Canvas.module.css";
 import useWebSocket from "react-use-websocket";
-import { default as palette } from '@/palette';
+import { default as palette } from "@/palette";
 
 export default function Canvas() {
   const width = 360;
@@ -22,10 +22,10 @@ export default function Canvas() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const emptyPixelData = useMemo(() => {
     const initial = new Array(width).fill(0);
-    for(let x = 0; x < width; ++x) {
+    for (let x = 0; x < width; ++x) {
       initial[x] = new Array(height).fill(0);
-      for(let y = 0; y < height; ++y) {
-        initial[x][y] = { x: x, y: y, timestamp: 0, colorIndex: 0 }
+      for (let y = 0; y < height; ++y) {
+        initial[x][y] = { x: x, y: y, timestamp: 0, colorIndex: 0 };
       }
     }
     return initial;
@@ -35,23 +35,25 @@ export default function Canvas() {
   const socketUrl = "wss://canvas-websocket.jamm.es/ws";
 
   useEffect(() => {
-    setIsLoggedIn(localStorage.getItem('token') !== null);
-  }, [])
+    setIsLoggedIn(localStorage.getItem("token") !== null);
+  }, []);
 
-  const { sendJsonMessage, lastJsonMessage, sendMessage } = useWebSocket(socketUrl, {
-    onOpen: () => {
-      if(localStorage.getItem('token') === null) {
-        sendMessage('guest');
-        console.log('opened guest');
-      }
-      else {
-        sendMessage(localStorage.getItem('token'));
-        console.log('opened token');
-      }
+  const { sendJsonMessage, lastJsonMessage, sendMessage } = useWebSocket(
+    socketUrl,
+    {
+      onOpen: () => {
+        if (localStorage.getItem("token") === null) {
+          sendMessage("guest");
+          console.log("opened guest");
+        } else {
+          sendMessage(localStorage.getItem("token"));
+          console.log("opened token");
+        }
+      },
+      //Will attempt to reconnect on all close events, such as server shutting down
+      shouldReconnect: (closeEvent) => true,
     },
-    //Will attempt to reconnect on all close events, such as server shutting down
-    shouldReconnect: (closeEvent) => true,
-  });
+  );
 
   // to receive updates
   useEffect(() => {
@@ -62,7 +64,7 @@ export default function Canvas() {
       const newPalette = lastJsonMessage.palette;
       const newPixels = lastJsonMessage.pixels;
       let authoritativeColors = colors;
-      if(newPalette !== undefined && newPalette.timestamp > colorsTimestamp) {
+      if (newPalette !== undefined && newPalette.timestamp > colorsTimestamp) {
         authoritativeColors = newPalette.colors;
         setColors(newPalette.colors);
         setLineColor(newPalette.colors[lineColorIndex]);
@@ -72,9 +74,9 @@ export default function Canvas() {
           setLineColorIndex(0);
         }
 
-        if(newPixels === undefined) {
-          for(let x = 0; x < width; ++x) {
-            for(let y = 0; y < height; ++y) {
+        if (newPixels === undefined) {
+          for (let x = 0; x < width; ++x) {
+            for (let y = 0; y < height; ++y) {
               const colorIndex = pixelData.current[x][y].colorIndex;
               ctx.fillStyle = authoritativeColors[colorIndex];
               ctx.fillRect(x, y, 1, 1);
@@ -83,7 +85,7 @@ export default function Canvas() {
         }
       }
 
-      if(newPixels !== undefined) {
+      if (newPixels !== undefined) {
         newPixels.map(({ colorIndex, timestamp, x, y }) => {
           if (timestamp > pixelData.current[x][y].timestamp) {
             ctx.fillStyle = authoritativeColors[colorIndex];
@@ -112,7 +114,12 @@ export default function Canvas() {
   };
 
   const handleMouseMove = async (e) => {
-    if (!isDrawing || lineColor === null || localStorage.getItem('token') == null) return;
+    if (
+      !isDrawing ||
+      lineColor === null ||
+      localStorage.getItem("token") == null
+    )
+      return;
 
     const currentX = e.nativeEvent.offsetX;
     const currentY = e.nativeEvent.offsetY;
@@ -212,7 +219,7 @@ export default function Canvas() {
       const x = Math.floor(pix / 9999);
       const y = pix % 9999;
 
-      if(tstamp < pixelData.current[x][y].timestamp) {
+      if (tstamp < pixelData.current[x][y].timestamp) {
         continue;
       }
 
@@ -238,9 +245,9 @@ export default function Canvas() {
   };
 
   const handleChangePalette = () => {
-    const newPalette = palette[Math.floor(Math.random()*palette.length)];
+    const newPalette = palette[Math.floor(Math.random() * palette.length)];
     const timestamp = Date.now();
-    if(timestamp < colorsTimestamp) {
+    if (timestamp < colorsTimestamp) {
       return;
     }
     setColors(newPalette);
@@ -249,28 +256,28 @@ export default function Canvas() {
     sendJsonMessage({
       palette: {
         colors: newPalette,
-        timestamp: timestamp
-      }
+        timestamp: timestamp,
+      },
     });
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    for(let x = 0; x < width; ++x) {
-      for(let y = 0; y < height; ++y) {
+    for (let x = 0; x < width; ++x) {
+      for (let y = 0; y < height; ++y) {
         const colorIndex = pixelData.current[x][y].colorIndex;
         ctx.fillStyle = newPalette[colorIndex];
         ctx.fillRect(x, y, 1, 1);
       }
     }
-  }
+  };
 
   const handleClearAll = () => {
     const pixels = [];
     const timestamp = Date.now();
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    for(let x = 0; x < width; ++x) {
-      for(let y = 0; y < height; ++y) {
-        if(pixelData.current[x][y].timestamp > timestamp) {
+    for (let x = 0; x < width; ++x) {
+      for (let y = 0; y < height; ++y) {
+        if (pixelData.current[x][y].timestamp > timestamp) {
           continue;
         }
         pixelData.current[x][y].timestamp = timestamp;
@@ -282,9 +289,9 @@ export default function Canvas() {
     }
 
     sendJsonMessage({
-      pixels: pixels
-    })
-  }
+      pixels: pixels,
+    });
+  };
 
   return (
     <div className={styles.canvasWrapper}>
@@ -300,16 +307,16 @@ export default function Canvas() {
       >
         The canvas could not be displayed. Please try again.
       </canvas>
-        <Palette
-            colors={colors}
-            // handleLineColor={setLineColor}
-            handleLineColor={handleLineColor}
-            widths={widths}
-            handleLineWidth={setLineWidth}
-            isLoggedIn={isLoggedIn}
-            handleClearAll={handleClearAll}
-            handleChangePalette={handleChangePalette}
-        />
+      <Palette
+        colors={colors}
+        // handleLineColor={setLineColor}
+        handleLineColor={handleLineColor}
+        widths={widths}
+        handleLineWidth={setLineWidth}
+        isLoggedIn={isLoggedIn}
+        handleClearAll={handleClearAll}
+        handleChangePalette={handleChangePalette}
+      />
     </div>
   );
 }

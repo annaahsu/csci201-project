@@ -1,4 +1,4 @@
-import {FiPenTool, FiXCircle, FiTrash, FiRefreshCw} from "react-icons/fi";
+import { FiPenTool, FiXCircle, FiTrash, FiRefreshCw } from "react-icons/fi";
 import styles from "./Palette.module.css";
 
 export default function Palette({
@@ -8,11 +8,16 @@ export default function Palette({
   handleLineWidth,
   isLoggedIn,
   handleClearAll,
-  handleChangePalette
+  handleChangePalette,
 }) {
   return (
-    <div className={[styles.palette].join(' ')}>
-      <div className={[styles.paletteInside, isLoggedIn ? '' : styles.paletteGuest].join(' ')}>
+    <div className={[styles.palette].join(" ")}>
+      <div
+        className={[
+          styles.paletteInside,
+          isLoggedIn ? "" : styles.paletteGuest,
+        ].join(" ")}
+      >
         <div className={`${styles.tools} ${styles.paletteSection}`}>
           <div className={styles.tool}>
             <FiPenTool />
@@ -64,10 +69,11 @@ export default function Palette({
           ))}
         </div>
       </div>
-      <div className={styles.paletteOverlay} style={isLoggedIn ? { display: 'none' } : { display: 'flex' } }>
-        <div>
-          Log in to draw on the canvas
-        </div>
+      <div
+        className={styles.paletteOverlay}
+        style={isLoggedIn ? { display: "none" } : { display: "flex" }}
+      >
+        <div>Log in to draw on the canvas</div>
       </div>
     </div>
   );
