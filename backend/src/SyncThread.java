@@ -33,7 +33,7 @@ public class SyncThread extends Thread {
 
         for(int i = 0; i < canvasWidth; ++i) {
             for(int j = 0; j < canvasHeight; ++j) {
-                canvasData.put(new XY(i, j), new Pixel(12));
+                canvasData.put(new XY(i, j), new Pixel(7));
             }
         }
     }

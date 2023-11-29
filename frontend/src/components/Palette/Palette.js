@@ -1,4 +1,4 @@
-import { FiPenTool, FiXCircle, FiTrash } from "react-icons/fi";
+import {FiPenTool, FiXCircle, FiTrash, FiRefreshCw} from "react-icons/fi";
 import styles from "./Palette.module.css";
 
 export default function Palette({
@@ -6,7 +6,9 @@ export default function Palette({
   handleLineColor,
   widths,
   handleLineWidth,
-  isLoggedIn
+  isLoggedIn,
+  handleClearAll,
+  handleChangePalette
 }) {
   return (
     <div className={[styles.palette].join(' ')}>
@@ -18,8 +20,11 @@ export default function Palette({
           <div className={styles.tool}>
             <FiXCircle />
           </div>
-          <div className={styles.tool}>
+          <div className={styles.tool} onClick={handleClearAll}>
             <FiTrash />
+          </div>
+          <div className={styles.tool} onClick={handleChangePalette}>
+            <FiRefreshCw />
           </div>
         </div>
         <div className={`${styles.colorPalette} ${styles.paletteSection}`}>
