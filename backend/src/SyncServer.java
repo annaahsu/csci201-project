@@ -1,5 +1,4 @@
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.util.*;
 
 import com.google.gson.Gson;
@@ -11,11 +10,15 @@ public class SyncServer extends WebSocketServer {
 
     private SyncThread syncThread;
     Gson gson;
+    Set<InetSocketAddress> checkedEndpoints;
+    Set<InetSocketAddress> loggedInEndpoints;
 
     public SyncServer(SyncThread syncThread, InetSocketAddress address) {
         super(address);
         this.gson = new Gson();
         this.syncThread = syncThread;
+        this.checkedEndpoints = new HashSet<>();
+        this.loggedInEndpoints = new HashSet<>();
     }
 
     @Override
@@ -36,11 +39,40 @@ public class SyncServer extends WebSocketServer {
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+        checkedEndpoints.remove(conn.getLocalSocketAddress());
+        loggedInEndpoints.remove(conn.getLocalSocketAddress());
         System.out.println("closed " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        if(!checkedEndpoints.contains(conn.getLocalSocketAddress())) {
+            System.out.println(message);
+            checkedEndpoints.add(conn.getLocalSocketAddress());
+            if(message.equals("guest")) {
+                return;
+            }
+
+            // tried logging in with token
+            if(Login.verifyJWT(message)) {
+                loggedInEndpoints.add(conn.getLocalSocketAddress());
+            }
+            else {
+                conn.closeConnection(-1, "Invalid token");
+                return;
+            }
+            return;
+        }
+
+        if(!loggedInEndpoints.contains(conn.getLocalSocketAddress())) {
+            conn.closeConnection(-1, "Not logged in user tried to write");
+            return;
+        }
+
+        System.out.println(message);
+
+
+
         Update update = gson.fromJson(message, Update.class);
         System.out.println("received message from "	+ conn.getRemoteSocketAddress() + ": " + message);
         ArrayList<WebSocket> toBroadcast = new ArrayList<>();

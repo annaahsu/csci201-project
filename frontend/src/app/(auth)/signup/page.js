@@ -20,7 +20,7 @@ export default function SignupPage() {
     async function signupFunc(event) {
         event.preventDefault();
         console.log({ fname, lname, uname, email, password, confirmPassword });
-        var url = new URL("http://localhost:8080/signup");
+        var url = new URL("https://canvas-websocket.jamm.es/auth/signup");
         const response = await fetch(url, {
             method: 'POST',
             body: JSON.stringify({ fname, lname, uname, email, password, confirmPassword })
@@ -43,7 +43,10 @@ export default function SignupPage() {
         }
 
         document.getElementById("warning_message").innerHTML = "";
-        window.location.href = 'http://localhost:3000/canvas';
+        const token = await response.text();
+        console.log(token);
+        localStorage.setItem('token', token);
+        window.location.href = '/canvas';
 
 
         // Old code

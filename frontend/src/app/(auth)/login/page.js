@@ -16,7 +16,7 @@ export default function LoginPage() {
     async function loginFunc(event) {
         event.preventDefault();
         console.log({ username, password });
-        var url = new URL("http://localhost:8080/login");
+        var url = new URL("https://canvas-websocket.jamm.es/auth/login");
         const response = await fetch(url, {
             method: 'POST',
             body: JSON.stringify({ username, password })
@@ -34,7 +34,10 @@ export default function LoginPage() {
         }
 
         document.getElementById("warning_message").innerHTML = "";
-        window.location.href = 'http://localhost:3000/canvas';
+        const token = await response.text();
+        console.log(token);
+        localStorage.setItem('token', token);
+        window.location.href = '/canvas';
 
 
         // Old code

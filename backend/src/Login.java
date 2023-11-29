@@ -53,8 +53,7 @@ public class Login implements HttpHandler {
         if(authenticate(username, password)) {
             // Formatting response to be JSON format
             String token = generateJWTToken();
-            response = "{" + "\"jwtToken\": \"" + token + "\"}";
-            System.out.println(response);
+            response = token;
             l.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
         }
         else {
@@ -73,6 +72,7 @@ public class Login implements HttpHandler {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://localhost/csci201project?user=root&password=root");
             String query = "SELECT salt FROM users WHERE username=?";
             ps = conn.prepareStatement(query);
@@ -97,7 +97,7 @@ public class Login implements HttpHandler {
                     return false;
                 }
             }
-        } catch(SQLException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+        } catch(SQLException | NoSuchAlgorithmException | InvalidKeySpecException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
         finally {
@@ -116,9 +116,9 @@ public class Login implements HttpHandler {
     }
 
     // Generates JWT Token to send to the client, who then sends it to the Web Socket (extra layer of security)
-    public String generateJWTToken() throws IOException {
+    public static String generateJWTToken() throws IOException {
         // Retrieving the secret key used for the HMAC algorithm
-        String fileName = "/Users/brandonchoi/Documents/201gp_jwtkey/jwt_key.txt";
+        String fileName = "secret.txt";
         FileReader fr = new FileReader(fileName);
         BufferedReader br = new BufferedReader(fr);
         String secret = "";
@@ -135,7 +135,7 @@ public class Login implements HttpHandler {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             token = JWT.create()
                     .withIssuedAt(new Date())
-                    .withExpiresAt(new Date(System.currentTimeMillis() + 5000))
+                    .withExpiresAt(new Date(System.currentTimeMillis() + 1000*60*60*24*7))
                     .sign(algorithm);
 
         } catch (JWTCreationException e) {
@@ -147,13 +147,19 @@ public class Login implements HttpHandler {
 
     // Verifies the JWT; static so it could be used by the Web Socket
     public static boolean verifyJWT(String token) {
-        String fileName = "/Users/brandonchoi/Documents/201gp_jwtkey/jwt_key.txt";
-        Path path = Paths.get(fileName);
-        byte[] secret = null;
+        String fileName = "secret.txt";
+        FileReader fr = null;
+        String secret = "";
         try {
-            secret = Files.readAllBytes(path);
-        }
-        catch (IOException e) {
+            fr = new FileReader(fileName);
+            BufferedReader br = new BufferedReader(fr);
+            String temp;
+            while((temp = br.readLine()) != null){
+                secret += temp;
+            }
+            fr.close();
+            br.close();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 

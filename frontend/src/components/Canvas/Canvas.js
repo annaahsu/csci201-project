@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import Palette from "@/components/Palette/Palette";
 import styles from "./Canvas.module.css";
 import useWebSocket from "react-use-websocket";
@@ -18,13 +18,27 @@ export default function Canvas() {
   const [lineColor, setLineColor] = useState(null);
   const [lineColorIndex, setLineColorIndex] = useState(-1);
   const [lineWidth, setLineWidth] = useState(widths[0]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const timestamps = new Array(width).fill(new Array(height).fill(0));
 
-  const socketUrl = "ws://localhost:8124";
+  const socketUrl = "wss://canvas-websocket.jamm.es/ws";
 
-  const { sendJsonMessage, lastJsonMessage } = useWebSocket(socketUrl, {
-    onOpen: () => console.log("opened"),
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem('token') !== null);
+  }, [])
+
+  const { sendJsonMessage, lastJsonMessage, sendMessage } = useWebSocket(socketUrl, {
+    onOpen: () => {
+      if(localStorage.getItem('token') === null) {
+        sendMessage('guest');
+        console.log('opened guest');
+      }
+      else {
+        sendMessage(localStorage.getItem('token'));
+        console.log('opened token');
+      }
+    },
     //Will attempt to reconnect on all close events, such as server shutting down
     shouldReconnect: (closeEvent) => true,
   });
@@ -71,7 +85,7 @@ export default function Canvas() {
   };
 
   const handleMouseMove = async (e) => {
-    if (!isDrawing || lineColor === null) return;
+    if (!isDrawing || lineColor === null || localStorage.getItem('token') == null) return;
 
     const currentX = e.nativeEvent.offsetX;
     const currentY = e.nativeEvent.offsetY;
@@ -203,13 +217,14 @@ export default function Canvas() {
       >
         The canvas could not be displayed. Please try again.
       </canvas>
-      <Palette
-        colors={colors}
-        // handleLineColor={setLineColor}
-        handleLineColor={handleLineColor}
-        widths={widths}
-        handleLineWidth={setLineWidth}
-      />
+        <Palette
+            colors={colors}
+            // handleLineColor={setLineColor}
+            handleLineColor={handleLineColor}
+            widths={widths}
+            handleLineWidth={setLineWidth}
+            isLoggedIn={isLoggedIn}
+        />
     </div>
   );
 }

@@ -66,7 +66,7 @@ public class SignUp implements HttpHandler {
         System.out.println(signUpSuccess);
         if (signUpSuccess) {
             System.out.println("Inserted into database.");
-            response = "Successfully signed up! You can now draw on the canvas!";
+            response = Login.generateJWTToken();
             s.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
         }
         else {
@@ -104,14 +104,15 @@ public class SignUp implements HttpHandler {
         ResultSet rs = null;
         try {
             // Connecting with database
+            Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://localhost/csci201project?user=root&password=root");
             // Check if username already exists in database
-            String checkQuery = "SELECT username FROM users WHERE username=?";
+            String checkQuery = "SELECT username FROM csci201project.users WHERE username=?";
             ps = conn.prepareStatement(checkQuery);
             ps.setString(1, username);
             rs = ps.executeQuery();
             if (!rs.next()) {
-                String insertQuery = "INSERT INTO users VALUES (?,?,?,?,?,?)";
+                String insertQuery = "INSERT INTO csci201project.users VALUES (?,?,?,?,?,?)";
                 ps = conn.prepareStatement(insertQuery);
                 ps.setString(1, username);
                 ps.setString(2, hashedPassword);
@@ -126,7 +127,7 @@ public class SignUp implements HttpHandler {
                 // Username already exists
                 return false;
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
             try {

@@ -1,5 +1,12 @@
 .palette {
   display: flex;
+  position: relative;
+}
+
+.paletteInside {
+  display: flex;
+  width: 100%;
+  height: 100%;
   box-shadow: var(--drop);
 }
 
@@ -44,4 +51,22 @@
 
 .color:hover {
   cursor: pointer;
+}
+
+.paletteGuest {
+  pointer-events: none;
+  filter: blur(5px);
+  position: relative;
+}
+
+.paletteOverlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  inset: 0;
+}
+
+.paletteOverlay > div {
+
 }
