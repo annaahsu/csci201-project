@@ -28,7 +28,6 @@ export default function Canvas() {
         initial[x][y] = { x: x, y: y, timestamp: 0, colorIndex: 0 }
       }
     }
-    console.log(initial);
     return initial;
   }, []);
   const pixelData = useRef(emptyPixelData);
@@ -236,7 +235,6 @@ export default function Canvas() {
       },
     };
     sendJsonMessage(update);
-    console.log(update);
   };
 
   const handleChangePalette = () => {
