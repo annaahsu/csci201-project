@@ -35,8 +35,8 @@ export default function CanvasRootLayout({ children }) {
           <div className={styles.navLinks}>
             {
               !isSignedIn
-                ? <ButtonLink href={'/login'}>Log In</ButtonLink>
-                : <div className={'button'} onClick={handleLogOut}>Log out</div>
+                ? <ButtonLink href='/login'>Log In</ButtonLink>
+                : <div className='button' onClick={handleLogOut}>Log out</div>
             }
           </div>
         </nav>

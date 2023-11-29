@@ -1,7 +1,8 @@
 // indicate this program is a client entry so "useState" can be used
 'use client'
 // 3 lines from https://stackoverflow.com/questions/23929432/submit-form-in-reactjs-using-button-element
-import React, { useState } from 'react';
+import { useState } from 'react';
+import Link from "next/link";
 import Button from "@/components/Button/Button";
 import styles from "../styles.module.css";
 import Input from "@/components/Input/Input";
@@ -47,41 +48,6 @@ export default function SignupPage() {
         console.log(token);
         localStorage.setItem('token', token);
         window.location.href = '/canvas';
-
-
-        // Old code
-        // var params = { fname:  fname , lname:  lname , uname:  uname , email:  email , password:  password , confirmPassword:  confirmPassword };
-        // url.search = new URLSearchParams(params).toString();
-        // console.log(url);
-        // console.log(params);
-        // fetch(url)
-        //   .then(response => {
-        //     if (!response.ok) {
-        //       throw new Error('Network response was not ok');
-        //     }
-        //     return response.text();
-        //   })
-        //   .then((text) => {
-        //     // Handle the received JSON data
-        //     console.log("here's the text");
-        //     console.log(text); // Check if data is received correctly
-        //     // Update HTML or perform other operations with the data
-        //     //console.log(request.getContextPath() + '/lists.html')
-        //     // window.location.href = request.getContextPath() + '/lists.html';
-        //     if (text == "Successfully signed up! You can now draw on the canvas!") {
-        //       document.getElementById("warning_message").innerHTML = "";
-        //       window.location.href = request, getContextPath() + '/canvas';
-        //     }
-        //     if (text == "Passwords do not match!") {
-        //       document.getElementById("warning_message").innerHTML = '<p style="font-size: 12px">Passwords do not match, please try again.</p>';
-        //     } else if (text == "Username is already in use.") {
-        //       document.getElementById("warning_message").innerHTML = '<p style="font-size: 12px">User already exists, please try again.</p>';
-        //     } else {
-        //       document.getElementById("warning_message").innerHTML = '<p style="font-size: 12px">Sign up error.</p>';
-        //     }
-        //   })
-        //   .catch(error => console.error('Error fetching data:', error));
-        // console.log("im here!");
     }
 
     return (
@@ -99,7 +65,7 @@ export default function SignupPage() {
             </form>
             <div id="warning_message" style={{ color: "red" }}></div>
             <Button type="submit" form="signup">Sign Up</Button>
-            <p className={styles.small}>Already have an account? <span><a href="/login" className={styles.smalllink}>Log in.</a></span><br /> Don't want to sign up? <span><a href="/canvas" className={styles.smalllink}>continue as guest</a></span></p>
+            <p className={styles.small}>Already have an account? <Link href="/login" className={styles.smalllink}>Log in</Link>. Don't want to sign up? <Link href="/canvas" className={styles.smalllink}>continue as guest</Link>.</p>
         </div>
     );
 }

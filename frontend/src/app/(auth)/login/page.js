@@ -1,7 +1,8 @@
 // indicate this program is a client entry so "useState" can be used
 'use client'
 // 3 lines from https://stackoverflow.com/questions/23929432/submit-form-in-reactjs-using-button-element
-import React, { useState } from 'react';
+import Link from "next/link";
+import { useState } from 'react';
 import Button from "@/components/Button/Button";
 import styles from "../styles.module.css";
 import Input from "@/components/Input/Input";
@@ -38,31 +39,6 @@ export default function LoginPage() {
         console.log(token);
         localStorage.setItem('token', token);
         window.location.href = '/canvas';
-
-
-        // Old code
-        //   .then(response => {
-        //     if (!response.ok) {
-        //       throw new Error('Network response was not ok');
-        //     }
-        //     return response.text();
-        //   })
-        //   .then((text) => {
-        //     // Handle the received JSON data
-        //     console.log("here's the text");
-        //     console.log(text); // Check if data is received correctly
-        //     // Update HTML or perform other operations with the data
-        //     //console.log(request.getContextPath() + '/lists.html')
-        //     // window.location.href = request.getContextPath() + '/lists.html';
-        //     if (text == "401 Error") {
-        //       document.getElementById("warning_message").innerHTML = '<p style="font-size: 12px">Incorrect Credentials, please try again.</p>';
-        //     } else {
-        //       document.getElementById("warning_message").innerHTML = "";
-        //       window.location.href = request,getContextPath() + '/canvas';
-        //     }
-        //   })
-        //   .catch(error => console.error('Error fetching data:', error));
-        // console.log("im here!");
     }
 
     return (
@@ -76,7 +52,7 @@ export default function LoginPage() {
             </form>
             <div id="warning_message" style={{ color: "red" }}></div>
             <Button type="submit" form="login">Login</Button>
-            <p className={styles.small}>New member? <span><a href="/signup" className={styles.smalllink}>Create an account</a></span> or <span><a href="/canvas" className={styles.smalllink}>continue as guest</a></span></p>
+            <p className={styles.small}>New member? <Link href="/signup" className={styles.smalllink}>Create an account</Link> or <Link href="/canvas" className={styles.smalllink}>continue as guest</Link>.</p>
         </div>
     );
 }
