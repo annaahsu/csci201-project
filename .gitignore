@@ -4,3 +4,4 @@ node_modules
 secret.txt
 cert.pem
 privkey.pem
+/bin/

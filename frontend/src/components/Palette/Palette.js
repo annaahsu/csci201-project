@@ -9,6 +9,7 @@ export default function Palette({
   isLoggedIn,
   handleClearAll,
   handleChangePalette,
+  handleEraser
 }) {
   return (
     <div className={[styles.palette].join(" ")}>
@@ -22,7 +23,7 @@ export default function Palette({
           <div className={styles.tool}>
             <FiPenTool />
           </div>
-          <div className={styles.tool}>
+          <div className={styles.tool} onClick = {handleEraser}>
             <FiXCircle />
           </div>
           <div className={styles.tool} onClick={handleClearAll}>

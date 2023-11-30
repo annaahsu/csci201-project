@@ -87,7 +87,7 @@ public class SyncServer extends WebSocketServer {
         }
         if(update.pixels != null) {
             System.out.println("Yup");
-            for(PixelWithXY pixelWithXY : update.pixels) {
+            for(final PixelWithXY pixelWithXY : update.pixels) {
                 System.out.println(syncThread.canvasData.get(new XY(pixelWithXY.getX(), pixelWithXY.getY())));
                 syncThread.canvasData.computeIfPresent(new XY(pixelWithXY.getX(), pixelWithXY.getY()), ((xy, pixel) -> pixelWithXY.getTimestamp() > pixel.getTimestamp() ? new Pixel(pixelWithXY.getColorIndex(), pixelWithXY.getTimestamp()) : pixel));
             }

@@ -14,6 +14,8 @@ export default function Canvas() {
   const widths = [1, 2, 4];
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isErasing, setIsErasing] = useState(false);
+
   const prevX = useRef(0);
   const prevY = useRef(0);
   const [lineColor, setLineColor] = useState(null);
@@ -102,6 +104,12 @@ export default function Canvas() {
     setLineColor(colors[i]);
     setLineColorIndex(i);
   };
+  
+  const handleEraser = () => {
+	 setLineColor(colors[0]);
+     setLineColorIndex(0);
+	  
+  }
 
   const handleMouseDown = (e) => {
     setIsDrawing(true);
