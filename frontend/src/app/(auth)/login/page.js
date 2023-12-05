@@ -6,7 +6,6 @@ import { useState } from "react";
 import Button from "@/components/Button/Button";
 import styles from "../styles.module.css";
 import Input from "@/components/Input/Input";
-import {redirect} from "next/navigation";
 
 export default function LoginPage() {
   // declaring variables in the function that will be used for each field in the signup form
@@ -38,7 +37,7 @@ export default function LoginPage() {
     const token = await response.text();
     console.log(token);
     localStorage.setItem("token", token);
-    redirect('/canvas', 'push');
+    window.location.href = '/live-canvas/canvas';
   }
 
   return (

@@ -5,7 +5,6 @@ import ButtonLink from "@/components/ButtonLink/ButtonLink";
 import "../globals.css";
 import styles from "./styles.module.css";
 import { useEffect, useState } from "react";
-import {redirect} from "next/navigation";
 
 const gothic = Gothic_A1({ weight: ["400", "900"], subsets: ["latin"] });
 
@@ -22,7 +21,7 @@ export default function CanvasRootLayout({ children }) {
 
   const handleLogOut = () => {
     localStorage.removeItem("token");
-    redirect('/', 'push');
+    window.location.href = '/live-canvas';
   };
 
   return (
